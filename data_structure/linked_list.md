@@ -19,18 +19,18 @@
 
 > 给定一个排序链表，删除所有重复的元素，使得每个元素只出现一次。
 
-```go
-func deleteDuplicates(head *ListNode) *ListNode {
-    current := head
-    for current != nil {
-        // 全部删除完再移动到下一个元素
-        for current.Next != nil && current.Val == current.Next.Val {
-            current.Next = current.Next.Next
-        }
-        current = current.Next
+```javascript
+var deleteDuplicates = function(head) {
+  let current = head;
+  while(current && current.next) {
+    if(current.val === current.next.val) {
+      current.next = current.next.next;
+    } else {
+      current = current.next;
     }
-    return head
-}
+  }
+  return head;
+};
 ```
 
 ### [remove-duplicates-from-sorted-list-ii](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list-ii/)
@@ -39,35 +39,29 @@ func deleteDuplicates(head *ListNode) *ListNode {
 
 思路：链表头结点可能被删除，所以用 dummy node 辅助删除
 
-```go
-func deleteDuplicates(head *ListNode) *ListNode {
-    if head == nil {
-        return head
+```javascript
+var deleteDuplicates = function(head) {
+  const dummy = new ListNode(null);
+  dummy.next = head;
+  let curr = dummy;
+  while(curr.next && curr.next.next) {
+    if(curr.next.val === curr.next.next.val) {
+      const rmVal = curr.next.val;
+      while(curr.next && curr.next.val === rmVal) {
+        curr.next = curr.next.next;
+      }
+    } else {
+      curr = curr.next;
     }
-    dummy := &ListNode{Val: 0}
-    dummy.Next = head
-    head = dummy
-
-    var rmVal int
-    for head.Next != nil && head.Next.Next != nil {
-        if head.Next.Val == head.Next.Next.Val {
-            // 记录已经删除的值，用于后续节点判断
-            rmVal = head.Next.Val
-            for head.Next != nil && head.Next.Val == rmVal  {
-                head.Next = head.Next.Next
-            }
-        } else {
-            head = head.Next
-        }
-    }
-    return dummy.Next
-}
+  }
+  return dummy.next;
+};
 ```
 
 注意点
 • A->B->C 删除 B，A.next = C
 • 删除用一个 Dummy Node 节点辅助（允许头节点可变）
-• 访问 X.next 、X.value 一定要保证 X != nil
+• 访问 X.next 、X.value 一定要保证 X != null
 
 ### [reverse-linked-list](https://leetcode-cn.com/problems/reverse-linked-list/)
 
