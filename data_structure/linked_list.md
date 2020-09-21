@@ -69,22 +69,20 @@ var deleteDuplicates = function(head) {
 
 思路：用一个 prev 节点保存向前指针，temp 保存向后的临时指针
 
-```go
-func reverseList(head *ListNode) *ListNode {
-    var prev *ListNode
-    for head != nil {
-        // 保存当前head.Next节点，防止重新赋值后被覆盖
-        // 一轮之后状态：nil<-1 2->3->4
-        //              prev   head
-        temp := head.Next
-        head.Next = prev
-        // pre 移动
-        prev = head
-        // head 移动
-        head = temp
-    }
-    return prev
-}
+```javascript
+var reverseList = function(head) {
+  let prev = null;
+  while(head) {
+    // 保存当前head.Next节点，防止重新赋值后被覆盖
+    // 一轮之后状态：nil<-1 2->3->4
+    //              prev   head
+    const temp = head.next;
+    head.next = prev;
+    prev = head;
+    head = temp;
+  }
+  return prev;
+};
 ```
 
 ### [reverse-linked-list-ii](https://leetcode-cn.com/problems/reverse-linked-list-ii/)
@@ -93,45 +91,43 @@ func reverseList(head *ListNode) *ListNode {
 
 思路：先遍历到 m 处，翻转，再拼接后续，注意指针处理
 
-```go
-func reverseBetween(head *ListNode, m int, n int) *ListNode {
-    // 思路：先遍历到m处，翻转，再拼接后续，注意指针处理
-    // 输入: 1->2->3->4->5->NULL, m = 2, n = 4
-    if head == nil {
-        return head
-    }
-    // 头部变化所以使用dummy node
-    dummy := &ListNode{Val: 0}
-    dummy.Next = head
-    head = dummy
-    // 最开始：0->1->2->3->4->5->nil
-    var pre *ListNode
-    var i = 0
-    for i < m {
-        pre = head
-        head = head.Next
-        i++
-    }
-    // 遍历之后： 1(pre)->2(head)->3->4->5->NULL
-    // i = 1
-    var j = i
-    var next *ListNode
-    // 用于中间节点连接
-    var mid = head
-    for head != nil && j <= n {
-        // 第一次循环： 1 nil<-2 3->4->5->nil
-        temp := head.Next
-        head.Next = next
-        next = head
-        head = temp
-        j++
-    }
-    // 循环需要执行四次
-    // 循环结束：1 nil<-2<-3<-4 5(head)->nil
-    pre.Next = next
-    mid.Next = head
-    return dummy.Next
-}
+```javascript
+var reverseBetween = function (head, m, n) {
+  if (!head) {
+    return head;
+  }
+  // 思路：先遍历到m处，翻转，再拼接后续，注意指针处理
+  // 输入: 1->2->3->4->5->null, m = 2, n = 4
+  const dummy = new ListNode(0);
+  dummy.next = head;
+  head = dummy;
+  let i = 0;
+  let pre;
+  // 最开始：0->1->2->3->4->5->null
+  while (i < m) {
+    pre = head;
+    head = head.next;
+    i++;
+  }
+  // 遍历之后： 1(pre)->2(head)->3->4->5->null
+  // i = 1
+  let next;
+  // 用于中间节点连接
+  let mid = head;
+  while (head !== null && i <= n) {
+    // 第一次循环： 1 nil<-2 3->4->5->null
+    const temp = head.next;
+    head.next = next;
+    next = head;
+    head = temp;
+    i++;
+  }
+  // 循环需要执行四次
+  // 循环结束：1 null<-2<-3<-4 5(head)->null
+  pre.next = next;
+  mid.next = head;
+  return dummy.next;
+};
 ```
 
 ### [merge-two-sorted-lists](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
