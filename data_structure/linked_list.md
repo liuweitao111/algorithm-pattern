@@ -136,34 +136,24 @@ var reverseBetween = function (head, m, n) {
 
 思路：通过 dummy node 链表，连接各个元素
 
-```go
-func mergeTwoLists(l1 *ListNode, l2 *ListNode) *ListNode {
-    dummy := &ListNode{Val: 0}
-    head := dummy
-    for l1 != nil && l2 != nil {
-        if l1.Val < l2.Val {
-            head.Next = l1
-            l1 = l1.Next
-        } else {
-            head.Next = l2
-            l2 = l2.Next
-        }
-        head = head.Next
+```javascript
+var mergeTwoLists = function(l1, l2) {
+  const dummy = new ListNode();
+  let head = dummy;
+  while(l1 && l2) {
+    if(l1.val < l2.val) {
+      head.next = l1;
+      head = head.next;
+      l1 = l1.next;
+    } else {
+      head.next = l2;
+      head = head.next;
+      l2 = l2.next;
     }
-    // 连接l1 未处理完节点
-    for l1 != nil {
-        head.Next = l1
-        head = head.Next
-        l1 = l1.Next
-    }
-    // 连接l2 未处理完节点
-    for l2 != nil {
-        head.Next = l2
-        head = head.Next
-        l2 = l2.Next
-    }
-    return dummy.Next
-}
+  }
+  head.next = l1 ? l1 : l2;
+  return dummy.next;
+};
 ```
 
 ### [partition-list](https://leetcode-cn.com/problems/partition-list/)
@@ -172,34 +162,25 @@ func mergeTwoLists(l1 *ListNode, l2 *ListNode) *ListNode {
 
 思路：将大于 x 的节点，放到另外一个链表，最后连接这两个链表
 
-```go
-func partition(head *ListNode, x int) *ListNode {
-    // 思路：将大于x的节点，放到另外一个链表，最后连接这两个链表
-    // check
-    if head == nil {
-        return head
+```javascript
+var partition = function(head, x) {
+  const headDummy = new ListNode();
+  const tailDummy = new ListNode();
+  let headNode = headDummy;
+  let tailNode = tailDummy;
+  while(head) {
+    if(head.val < x) {
+      headNode.next = head;
+      headNode = headNode.next;
+    } else {
+      tailNode.next = head;
+      tailNode = tailNode.next;
     }
-    headDummy := &ListNode{Val: 0}
-    tailDummy := &ListNode{Val: 0}
-    tail := tailDummy
-    headDummy.Next = head
-    head = headDummy
-    for head.Next != nil {
-        if head.Next.Val < x {
-            head = head.Next
-        } else {
-            // 移除<x节点
-            t := head.Next
-            head.Next = head.Next.Next
-            // 放到另外一个链表
-            tail.Next = t
-            tail = tail.Next
-        }
-    }
-    // 拼接两个链表
-    tail.Next = nil
-    head.Next = tailDummy.Next
-    return headDummy.Next
+    head = head.next;
+  }
+  headNode.next = tailDummy.next;
+  tailNode.next = null;
+  return headDummy.next;
 }
 ```
 
@@ -213,64 +194,109 @@ func partition(head *ListNode, x int) *ListNode {
 
 思路：归并排序，找中点和合并操作
 
-```go
-func sortList(head *ListNode) *ListNode {
-    // 思路：归并排序，找中点和合并操作
-    return mergeSort(head)
-}
-func findMiddle(head *ListNode) *ListNode {
-    // 1->2->3->4->5
-    slow := head
-    fast := head.Next
-    // 快指针先为nil
-    for fast !=nil && fast.Next != nil {
-        fast = fast.Next.Next
-        slow = slow.Next
-    }
-    return slow
-}
-func mergeTwoLists(l1 *ListNode, l2 *ListNode) *ListNode {
-    dummy := &ListNode{Val: 0}
-    head := dummy
-    for l1 != nil && l2 != nil {
-        if l1.Val < l2.Val {
-            head.Next = l1
-            l1 = l1.Next
+迭代版
+```javascript
+var sortList = function(head) {
+  let h = head;
+  let length = 0;
+  // 统计长度
+  while(h !== null) {
+    h = h.next;
+    length++;
+  }
+  //设置头指针，保存head
+  const root = new ListNode(); 
+  root.next = head;
+  // 依次增加归并排序归并的链表长度
+  for(let seg = 1; seg < length; seg *= 2) {
+    let temp = root;
+    h = root.next;
+    while(h !== null) {
+      // 切割出第一段有序链表，链表的头部保存的到h1
+      let i = seg;
+      let h1 = h; 
+      while(i > 0 && h !== null) {
+        i--;
+        h = h.next;
+      }
+      // 如果第一段的长度不足interval，则不需要合并，直接跳出
+      if(i > 0) {
+        break;
+      }
+      // 切割出第二段有序链表，链表的头部保存的到h2
+      i = seg;
+      let h2 = h; 
+      while(i > 0 && h !== null) {
+        i--;
+        h = h.next;
+      }
+      let l1 = seg; // 第一段有序链表的长度
+      let l2 = seg - i; // 第二段有序链表的长度
+      // 合并两段有序链表
+      while(l1 > 0 && l2 > 0) {
+        if(h1.val < h2.val) {
+          temp.next = h1;
+          h1 = h1.next;
+          l1--;
         } else {
-            head.Next = l2
-            l2 = l2.Next
+          temp.next = h2;
+          h2 = h2.next;
+          l2--;
         }
-        head = head.Next
+        temp = temp.next;
+      }
+      temp.next = l1 === 0 ? h2 : h1;
+      while(l1 > 0 || l2 > 0) {
+        temp = temp.next;
+        l1--;
+        l2--;
+      }
+      temp.next = h;
     }
-    // 连接l1 未处理完节点
-    for l1 != nil {
-        head.Next = l1
-        head = head.Next
-        l1 = l1.Next
-    }
-    // 连接l2 未处理完节点
-    for l2 != nil {
-        head.Next = l2
-        head = head.Next
-        l2 = l2.Next
-    }
-    return dummy.Next
+  }
+  return root.next;
+};
+```
+递归版
+```javascript
+const findMid = head => {
+  let slow = head;
+  let fast = head.next;
+  while(fast && fast.next) {
+    fast = fast.next.next;
+    slow = slow.next;
+  }
+  return slow;
 }
-func mergeSort(head *ListNode) *ListNode {
-    // 如果只有一个节点 直接就返回这个节点
-    if head == nil || head.Next == nil{
-        return head
+const merge = (l1, l2) => {
+  const root = new ListNode();
+  let next = root;
+  while(l1 && l2) {
+    if(l1.val < l2.val) {
+      next.next = l1;
+      l1 = l1.next;
+    } else {
+      next.next = l2;
+      l2 = l2.next;
     }
-    // find middle
-    middle := findMiddle(head)
-    // 断开中间节点
-    tail := middle.Next
-    middle.Next = nil
-    left := mergeSort(head)
-    right := mergeSort(tail)
-    result := mergeTwoLists(left, right)
-    return result
+    next = next.next;
+  }
+  next.next = l1 ? l1 : l2;
+  return root.next;
 }
+const mergeSort = head => {
+  if(!head || !head.next) {
+    return head;
+  }
+  const mid = findMid(head);
+  const tail = mid.next;
+  mid.next = null;
+  const result = merge(mergeSort(head), mergeSort(tail));
+  return result;
+}
+var sortList = function(head) {
+  return mergeSort(head);
+};
 ```
 
 注意点
@@ -286,71 +312,40 @@ func mergeSort(head *ListNode) *ListNode {
 
 思路：找到中点断开，翻转后面部分，然后合并前后两个链表
 
-```go
-func reorderList(head *ListNode)  {
-    // 思路：找到中点断开，翻转后面部分，然后合并前后两个链表
-    if head == nil {
-        return
-    }
-    mid := findMiddle(head)
-    tail := reverseList(mid.Next)
-    mid.Next = nil
-    head = mergeTwoLists(head, tail)
-}
-func findMiddle(head *ListNode) *ListNode {
-    fast := head.Next
-    slow := head
-    for fast != nil && fast.Next != nil {
-        fast = fast.Next.Next
-        slow = slow.Next
-    }
-    return slow
-}
-func mergeTwoLists(l1 *ListNode, l2 *ListNode) *ListNode {
-    dummy := &ListNode{Val: 0}
-    head := dummy
-    toggle := true
-    for l1 != nil && l2 != nil {
-        // 节点切换
-        if toggle {
-            head.Next = l1
-            l1 = l1.Next
-        } else {
-            head.Next = l2
-            l2 = l2.Next
-        }
-        toggle = !toggle
-        head = head.Next
-    }
-    // 连接l1 未处理完节点
-    for l1 != nil {
-        head.Next = l1
-        head = head.Next
-        l1 = l1.Next
-    }
-    // 连接l2 未处理完节点
-    for l2 != nil {
-        head.Next = l2
-        head = head.Next
-        l2 = l2.Next
-    }
-    return dummy.Next
-}
-func reverseList(head *ListNode) *ListNode {
-    var prev *ListNode
-    for head != nil {
-        // 保存当前head.Next节点，防止重新赋值后被覆盖
-        // 一轮之后状态：nil<-1 2->3->4
-        //              prev   head
-        temp := head.Next
-        head.Next = prev
-        // pre 移动
-        prev = head
-        // head 移动
-        head = temp
-    }
-    return prev
-}
+```javascript
+var reorderList = function(head) {
+  if(!head) {
+    return;
+  }
+  // 寻找中点
+  let fast = head.next;
+  let slow = head;
+  while(fast && fast.next) {
+    fast = fast.next.next;
+    slow = slow.next;
+  }
+  let h = slow.next
+  slow.next = null;
+  // 翻转链表
+  const h1 = new ListNode();
+  while(h) {
+    const tmp = h1.next;
+    const next = h.next;
+    h1.next = h;
+    h1.next.next = tmp;
+    h = next;
+  }
+  // 合并两个链表
+  h = h1.next;
+  while(head && h) {
+    const tmp1 = head.next;
+    const tmp2 = h.next;
+    head.next = h;
+    head.next.next = tmp1;
+    head = tmp1;
+    h = tmp2;
+  }
+};
 ```
 
 ### [linked-list-cycle](https://leetcode-cn.com/problems/linked-list-cycle/)
@@ -360,24 +355,19 @@ func reverseList(head *ListNode) *ListNode {
 思路：快慢指针，快慢指针相同则有环，证明：如果有环每走一步快慢指针距离会减 1
 ![fast_slow_linked_list](https://img.fuiboom.com/img/fast_slow_linked_list.png)
 
-```go
-func hasCycle(head *ListNode) bool {
-    // 思路：快慢指针 快慢指针相同则有环，证明：如果有环每走一步快慢指针距离会减1
-    if head == nil {
-        return false
+```javascript
+var hasCycle = function(head) {
+  let fast = head;
+  let slow = head;
+  while(fast && fast.next) {
+    fast = fast.next.next;
+    slow = slow.next;
+    if(fast === slow) {
+      return true;
     }
-    fast := head.Next
-    slow := head
-    for fast != nil && fast.Next != nil {
-        // 比较指针是否相等（不要使用val比较！）
-        if fast == slow {
-            return true
-        }
-        fast = fast.Next.Next
-        slow = slow.Next
-    }
-    return false
-}
+  }
+  return false;
+};
 ```
 
 ### [linked-list-cycle-ii](https://leetcode-cn.com/problems/linked-list-cycle-ii/)
@@ -387,32 +377,30 @@ func hasCycle(head *ListNode) bool {
 思路：快慢指针，快慢相遇之后，慢指针回到头，快慢指针步调一致一起移动，相遇点即为入环点
 ![cycled_linked_list](https://img.fuiboom.com/img/cycled_linked_list.png)
 
-```go
-func detectCycle(head *ListNode) *ListNode {
-    // 思路：快慢指针，快慢相遇之后，慢指针回到头，快慢指针步调一致一起移动，相遇点即为入环点
-    if head == nil {
-        return head
+```javascript
+var detectCycle = function(head) {
+  // 思路：快慢指针，快慢相遇之后，慢指针回到头，快慢指针步调一致一起移动，相遇点即为入环点
+  if(!head) {
+    return null;
+  }
+  let fast = head.next;
+  let slow = head;
+  while(fast && fast.next) {
+    fast = fast.next.next;
+    slow = slow.next;
+    if(fast === slow) {
+      // 慢指针重新从头开始移动，快指针从第一次相交点下一个节点开始移动
+      fast = head
+      slow = slow.next // 注意
+      while(fast !== slow) {
+        fast = fast.next;
+        slow = slow.next;
+      }
+      return slow;
     }
-    fast := head.Next
-    slow := head
-
-    for fast != nil && fast.Next != nil {
-        if fast == slow {
-            // 慢指针重新从头开始移动，快指针从第一次相交点下一个节点开始移动
-            fast = head
-            slow = slow.Next // 注意
-            // 比较指针对象（不要比对指针Val值）
-            for fast != slow {
-                fast = fast.Next
-                slow = slow.Next
-            }
-            return slow
-        }
-        fast = fast.Next.Next
-        slow = slow.Next
-    }
-    return nil
-}
+  }
+  return null;
+};
 ```
 
 坑点
@@ -422,87 +410,73 @@ func detectCycle(head *ListNode) *ListNode {
 
 另外一种方式是 fast=head,slow=head
 
-```go
-func detectCycle(head *ListNode) *ListNode {
-    // 思路：快慢指针，快慢相遇之后，其中一个指针回到头，快慢指针步调一致一起移动，相遇点即为入环点
-    // nb+a=2nb+a
-    if head == nil {
-        return head
-    }
-    fast := head
-    slow := head
-
-    for fast != nil && fast.Next != nil {
-        fast = fast.Next.Next
-        slow = slow.Next
-        if fast == slow {
-            // 指针重新从头开始移动
-            fast = head
-            for fast != slow {
-                fast = fast.Next
-                slow = slow.Next
-            }
-            return slow
+```javascript
+var detectCycle = function(head) {
+    let pre = head;
+    let fast = head;
+    let slow = head;
+    while(fast && fast.next) {
+      fast = fast.next.next;
+      slow = slow.next;
+      if(fast === slow) {
+        while(pre !== slow) {
+          pre = pre.next;
+          slow = slow.next;
         }
+        return slow;
+      }
     }
-    return nil
-}
+    return null;
+};
 ```
 
-这两种方式不同点在于，**一般用 fast=head.Next 较多**，因为这样可以知道中点的上一个节点，可以用来删除等操作。
+这两种方式不同点在于，**一般用 fast=head.next 较多**，因为这样可以知道中点的上一个节点，可以用来删除等操作。
 
-- fast 如果初始化为 head.Next 则中点在 slow.Next
+- fast 如果初始化为 head.next 则中点在 slow.next
 - fast 初始化为 head,则中点在 slow
 
 ### [palindrome-linked-list](https://leetcode-cn.com/problems/palindrome-linked-list/)
 
 > 请判断一个链表是否为回文链表。
 
-```go
-func isPalindrome(head *ListNode) bool {
-    // 1 2 nil
-    // 1 2 1 nil
-    // 1 2 2 1 nil
-    if head==nil{
-        return true
-    }
-    slow:=head
-    // fast如果初始化为head.Next则中点在slow.Next
-    // fast初始化为head,则中点在slow
-    fast:=head.Next
-    for fast!=nil&&fast.Next!=nil{
-        fast=fast.Next.Next
-        slow=slow.Next
-    }
-
-    tail:=reverse(slow.Next)
-    // 断开两个链表(需要用到中点前一个节点)
-    slow.Next=nil
-    for head!=nil&&tail!=nil{
-        if head.Val!=tail.Val{
-            return false
-        }
-        head=head.Next
-        tail=tail.Next
-    }
-    return true
-
+```javascript
+var reverse = function(head) {
+  const root = new ListNode();
+  let n = head;
+  while(n) {
+    const tmp = n.next;
+    n.next = root.next;
+    root.next = n;
+    n = tmp;
+  }
+  return root.next;
 }
 
-func reverse(head *ListNode)*ListNode{
-    // 1->2->3
-    if head==nil{
-        return head
+var isPalindrome = function(head) {
+  let slow = head;
+  let fast = head;
+
+  while(fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+  // 翻转链表
+  const middle = reverse(slow);
+  let flag = true;
+  let n1 = head; 
+  let n2 = middle;
+  while(n1 && n2) {
+    if(n1.val !== n2.val) {
+      flag = false;
+      break;
     }
-    var prev *ListNode
-    for head!=nil{
-        t:=head.Next
-        head.Next=prev
-        prev=head
-        head=t
-    }
-    return prev
-}
+    n1 = n1.next;
+    n2 = n2.next;
+  }
+  // 将链表翻转回去
+  reverse(middle);
+  return flag;
+};
 ```
 
 ### [copy-list-with-random-pointer](https://leetcode-cn.com/problems/copy-list-with-random-pointer/)
@@ -510,42 +484,49 @@ func reverse(head *ListNode)*ListNode{
 > 给定一个链表，每个节点包含一个额外增加的随机指针，该指针可以指向链表中的任何节点或空节点。
 > 要求返回这个链表的 深拷贝。
 
-思路：1、hash 表存储指针，2、复制节点跟在原节点后面
-
-```go
-func copyRandomList(head *Node) *Node {
-	if head == nil {
-		return head
-	}
-	// 复制节点，紧挨到到后面
-	// 1->2->3  ==>  1->1'->2->2'->3->3'
-	cur := head
-	for cur != nil {
-		clone := &Node{Val: cur.Val, Next: cur.Next}
-		temp := cur.Next
-		cur.Next = clone
-		cur = temp
-	}
-	// 处理random指针
-	cur = head
-	for cur != nil {
-		if cur.Random != nil {
-			cur.Next.Random = cur.Random.Next
-		}
-		cur = cur.Next.Next
-	}
-	// 分离两个链表
-	cur = head
-	cloneHead := cur.Next
-	for cur != nil && cur.Next != nil {
-		temp := cur.Next
-		cur.Next = cur.Next.Next
-		cur = temp
-	}
-	// 原始链表头：head 1->2->3
-	// 克隆的链表头：cloneHead 1'->2'->3'
-	return cloneHead
-}
+思路： 1、在链表的每个节点后面添加一个克隆的节点 2、根据原来节点的random，为克隆节点添加random 3、分割链表
+```javascript
+var copyRandomList = function(head) {
+  if(!head) {
+    return head;
+  }
+  let prev = head;
+  // Creating a new weaved list of original and copied nodes.
+  while(prev) {
+    // Cloned node
+    const cloneNode = new Node(prev.val);
+    // Inserting the cloned node just next to the original node.
+    // If A->B->C is the original linked list,
+    // Linked list after weaving cloned nodes would be A->A'->B->B'->C->C'
+    cloneNode.next = prev.next;
+    prev.next = cloneNode;
+    prev = prev.next.next;
+  }
+  prev = head;
+  // Now link the random pointers of the new nodes created.
+  // Iterate the newly created list and use the original nodes' random pointers,
+  // to assign references to random pointers for cloned nodes.
+  while(prev) {
+    prev.next.random = prev.random && prev.random.next;
+    prev = prev.next.next;
+  }
+  prev = head;
+  // Unweave the linked list to get back the original linked list and the cloned list.
+  // i.e. A->A'->B->B'->C->C' would be broken to A->B->C and A'->B'->C'
+  const cloneHead = new Node(); // A'->B'->C'
+  let clonePrev = cloneHead;
+  while(prev) {
+    // Add cloned node to new linked list
+    clonePrev.next = prev.next;
+    // Delete cloned node pointers in original node
+    prev.next = prev.next.next;
+    
+    prev = prev.next;
+    clonePrev = clonePrev.next;
+  }
+  clonePrev.next = null;
+  return cloneHead.next;
+};
 ```
 
 ## 总结
