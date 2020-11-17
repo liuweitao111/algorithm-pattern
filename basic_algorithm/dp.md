@@ -44,44 +44,25 @@
 
 动态规划，自底向上
 
-```go
-func minimumTotal(triangle [][]int) int {
-	if len(triangle) == 0 || len(triangle[0]) == 0 {
-		return 0
-	}
-	// 1、状态定义：f[i][j] 表示从i,j出发，到达最后一层的最短路径
-	var l = len(triangle)
-	var f = make([][]int, l)
-	// 2、初始化
-	for i := 0; i < l; i++ {
-		for j := 0; j < len(triangle[i]); j++ {
-			if f[i] == nil {
-				f[i] = make([]int, len(triangle[i]))
-			}
-			f[i][j] = triangle[i][j]
-		}
-	}
-	// 3、递推求解
-	for i := len(triangle) - 2; i >= 0; i-- {
-		for j := 0; j < len(triangle[i]); j++ {
-			f[i][j] = min(f[i+1][j], f[i+1][j+1]) + triangle[i][j]
-		}
-	}
-	// 4、答案
-	return f[0][0]
-}
-func min(a, b int) int {
-	if a > b {
-		return b
-	}
-	return a
-}
-
+```javascript
+var minimumTotal = function(triangle) {
+  const len = triangle.length;
+  if(len === 0) {
+    return 0;
+  }
+  const dp = [...triangle[len - 1]];
+  for(let i = len - 2; i >= 0; i--) {
+    for(let j = 0; j < triangle[i].length; j++) {
+      dp[j] = Math.min(dp[j], dp[j + 1]) + triangle[i][j];
+    }
+  }
+  return dp[0];
+};
 ```
 
 动态规划，自顶向下
 
-```go
+```javascript
 // 测试用例：
 // [
 // [2],
@@ -89,59 +70,32 @@ func min(a, b int) int {
 // [6,5,7],
 // [4,1,8,3]
 // ]
-func minimumTotal(triangle [][]int) int {
-    if len(triangle) == 0 || len(triangle[0]) == 0 {
-        return 0
+var minimumTotal = function(triangle) {
+  const len = triangle.length;
+  if(len === 0) {
+    return 0;
+  }
+  const dp = [triangle[0][0]];
+  for(let i = 1; i < len; i++) {
+    const len2 = triangle[i].length;
+    dp[len2 - 1] = dp[len2 - 2] + triangle[i][len2 - 1];
+    for(let j = len2 - 2; j > 0; j--) {
+      dp[j] = Math.min(dp[j - 1], dp[j]) + triangle[i][j];
     }
-    // 1、状态定义：f[i][j] 表示从0,0出发，到达i,j的最短路径
-    var l = len(triangle)
-    var f = make([][]int, l)
-    // 2、初始化
-    for i := 0; i < l; i++ {
-        for j := 0; j < len(triangle[i]); j++ {
-            if f[i] == nil {
-                f[i] = make([]int, len(triangle[i]))
-            }
-            f[i][j] = triangle[i][j]
-        }
-    }
-    // 递推求解
-    for i := 1; i < l; i++ {
-        for j := 0; j < len(triangle[i]); j++ {
-            // 这里分为两种情况：
-            // 1、上一层没有左边值
-            // 2、上一层没有右边值
-            if j-1 < 0 {
-                f[i][j] = f[i-1][j] + triangle[i][j]
-            } else if j >= len(f[i-1]) {
-                f[i][j] = f[i-1][j-1] + triangle[i][j]
-            } else {
-                f[i][j] = min(f[i-1][j], f[i-1][j-1]) + triangle[i][j]
-            }
-        }
-    }
-    result := f[l-1][0]
-    for i := 1; i < len(f[l-1]); i++ {
-        result = min(result, f[l-1][i])
-    }
-    return result
-}
-func min(a, b int) int {
-    if a > b {
-        return b
-    }
-    return a
-}
+    dp[0] += triangle[i][0];
+  }
+  return Math.min(...dp);
+};
 ```
 
 ## 递归和动规关系
 
 递归是一种程序的实现方式：函数的自我调用
 
-```go
-Function(x) {
+```javascript
+function(x) {
 	...
-	Funciton(x-1);
+	function(x-1);
 	...
 }
 ```
@@ -191,37 +145,24 @@ Function(x) {
 思路：动态规划
 1、state: f[x][y]从起点走到 x,y 的最短路径
 2、function: f[x][y] = min(f[x-1][y], f[x][y-1]) + A[x][y]
-3、intialize: f[0][0] = A[0][0]、f[i][0] = sum(0,0 -> i,0)、 f[0][i] = sum(0,0 -> 0,i)
-4、answer: f[n-1][m-1]
 
-```go
-func minPathSum(grid [][]int) int {
-    // 思路：动态规划
-    // f[i][j] 表示i,j到0,0的和最小
-    if len(grid) == 0 || len(grid[0]) == 0 {
-        return 0
+```javascript
+var minPathSum = function(grid) {
+  if(!grid.length) {
+    return 0;
+  }
+  const dp = [0];
+  for(let j = 0; j < grid[0].length; j++) {
+    dp[j + 1] = dp[j] + grid[0][j];
+  }
+  dp[0] = Infinity;
+  for(let i = 1; i < grid.length; i++) {
+    for(let j = 1; j <= grid[i].length; j++) {
+      dp[j] = Math.min(dp[j - 1], dp[j]) + grid[i][j - 1];
     }
-    // 复用原来的矩阵列表
-    // 初始化：f[i][0]、f[0][j]
-    for i := 1; i < len(grid); i++ {
-        grid[i][0] = grid[i][0] + grid[i-1][0]
-    }
-    for j := 1; j < len(grid[0]); j++ {
-        grid[0][j] = grid[0][j] + grid[0][j-1]
-    }
-    for i := 1; i < len(grid); i++ {
-        for j := 1; j < len(grid[i]); j++ {
-            grid[i][j] = min(grid[i][j-1], grid[i-1][j]) + grid[i][j]
-        }
-    }
-    return grid[len(grid)-1][len(grid[0])-1]
-}
-func min(a, b int) int {
-    if a > b {
-        return b
-    }
-    return a
-}
+  }
+  return dp[grid[0].length];
+};
 ```
 
 ### [unique-paths](https://leetcode-cn.com/problems/unique-paths/)
@@ -230,25 +171,22 @@ func min(a, b int) int {
 > 机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为“Finish”）。
 > 问总共有多少条不同的路径？
 
-```go
-func uniquePaths(m int, n int) int {
-	// f[i][j] 表示i,j到0,0路径数
-	f := make([][]int, m)
-	for i := 0; i < m; i++ {
-		for j := 0; j < n; j++ {
-			if f[i] == nil {
-				f[i] = make([]int, n)
-			}
-			f[i][j] = 1
-		}
-	}
-	for i := 1; i < m; i++ {
-		for j := 1; j < n; j++ {
-			f[i][j] = f[i-1][j] + f[i][j-1]
-		}
-	}
-	return f[m-1][n-1]
-}
+思路：动态规划
+1、state: dp[i][j] 是到达 i, j 最多路径
+2、function: dp[i][j] = dp[i-1][j] + dp[i][j-1]
+
+```javascript
+var uniquePaths = function(m, n) {
+  const dp = Array(m + 1).fill(1);
+  dp[0] = 0;
+  for(let i = 1; i < n; i++) {
+    for(let j = 1; j <= m; j++) {
+      dp[j] = dp[j] + dp[j - 1];
+    }
+    console.log(dp);
+  }
+  return dp[m];
+};
 ```
 
 ### [unique-paths-ii](https://leetcode-cn.com/problems/unique-paths-ii/)
@@ -258,44 +196,23 @@ func uniquePaths(m int, n int) int {
 > 问总共有多少条不同的路径？
 > 现在考虑网格中有障碍物。那么从左上角到右下角将会有多少条不同的路径？
 
-```go
-func uniquePathsWithObstacles(obstacleGrid [][]int) int {
-	// f[i][j] = f[i-1][j] + f[i][j-1] 并检查障碍物
-	if obstacleGrid[0][0] == 1 {
-		return 0
-	}
-	m := len(obstacleGrid)
-	n := len(obstacleGrid[0])
-	f := make([][]int, m)
-	for i := 0; i < m; i++ {
-		for j := 0; j < n; j++ {
-			if f[i] == nil {
-				f[i] = make([]int, n)
-			}
-			f[i][j] = 1
-		}
-	}
-	for i := 1; i < m; i++ {
-		if obstacleGrid[i][0] == 1 || f[i-1][0] == 0 {
-			f[i][0] = 0
-		}
-	}
-	for j := 1; j < n; j++ {
-		if obstacleGrid[0][j] == 1 || f[0][j-1] == 0 {
-			f[0][j] = 0
-		}
-	}
-	for i := 1; i < m; i++ {
-		for j := 1; j < n; j++ {
-			if obstacleGrid[i][j] == 1 {
-				f[i][j] = 0
-			} else {
-				f[i][j] = f[i-1][j] + f[i][j-1]
-			}
-		}
-	}
-	return f[m-1][n-1]
-}
+```javascript
+var uniquePathsWithObstacles = function(obstacleGrid) {
+  const len1 = obstacleGrid.length;
+  if(!len1) {
+    return 0;
+  }
+  const len2 = obstacleGrid[0].length;
+  const dp = Array(len2).fill(0);
+  dp[0] = 1;
+  for(let i = 0; i < len1; i++) {
+    dp[0] = obstacleGrid[i][0] === 1 ? 0 : dp[0];
+    for(let j = 1; j < len2; j++) {
+      dp[j] = obstacleGrid[i][j] === 1 ? 0 : dp[j] + dp[j - 1];
+    }
+  }
+  return dp[len2 - 1];
+};
 ```
 
 ## 2、序列类型（40%）
@@ -304,20 +221,17 @@ func uniquePathsWithObstacles(obstacleGrid [][]int) int {
 
 > 假设你正在爬楼梯。需要  *n*  阶你才能到达楼顶。
 
-```go
-func climbStairs(n int) int {
-    // f[i] = f[i-1] + f[i-2]
-    if n == 1 || n == 0 {
-        return n
-    }
-    f := make([]int, n+1)
-    f[1] = 1
-    f[2] = 2
-    for i := 3; i <= n; i++ {
-        f[i] = f[i-1] + f[i-2]
-    }
-    return f[n]
-}
+```javascript
+var climbStairs = function(n) {
+  let dp0 = 1;
+  let dp1 = 1;
+  for(let i = 2; i <= n; i++) {
+    const dp2 = dp0 + dp1;
+    dp0 = dp1;
+    dp1 = dp2;
+  }
+  return dp1;
+};
 ```
 
 ### [jump-game](https://leetcode-cn.com/problems/jump-game/)
@@ -326,26 +240,24 @@ func climbStairs(n int) int {
 > 数组中的每个元素代表你在该位置可以跳跃的最大长度。
 > 判断你是否能够到达最后一个位置。
 
-```go
-func canJump(nums []int) bool {
-    // 思路：看最后一跳
-    // 状态：f[i] 表示是否能从0跳到i
-    // 推导：f[i] = OR(f[j],j<i&&j能跳到i) 判断之前所有的点最后一跳是否能跳到当前点
-    // 初始化：f[0] = 0
-    // 结果： f[n-1]
-    if len(nums) == 0 {
-        return true
+```javascript
+// 思路：看最后一跳
+// 状态：f[i] 表示是否能从0跳到i
+// 推导：f[i] = OR(f[j],j<i&&j能跳到i) 判断之前所有的点最后一跳是否能跳到当前点
+// 初始化：f[0] = true
+// 结果： f[n-1]
+var canJump = function(nums) {
+  const dp = [true];
+  for(let i = 1; i < nums.length; i++) {
+    dp[i] = false;
+    for(let j = i - 1; j >= 0; j--) {
+      if(dp[j] && j + nums[j] >= i) {
+        dp[i] = true;
+        break;
+      }
     }
-    f := make([]bool, len(nums))
-    f[0] = true
-    for i := 1; i < len(nums); i++ {
-        for j := 0; j < i; j++ {
-            if f[j] == true && nums[j]+j >= i {
-                f[i] = true
-            }
-        }
-    }
-    return f[len(nums)-1]
+  }
+  return dp[nums.length - 1];
 }
 ```
 
@@ -355,53 +267,47 @@ func canJump(nums []int) bool {
 > 数组中的每个元素代表你在该位置可以跳跃的最大长度。
 > 你的目标是使用最少的跳跃次数到达数组的最后一个位置。
 
-```go
-// v1动态规划（其他语言超时参考v2）
-func jump(nums []int) int {
-    // 状态：f[i] 表示从起点到当前位置最小次数
-    // 推导：f[i] = f[j],a[j]+j >=i,min(f[j]+1)
-    // 初始化：f[0] = 0
-    // 结果：f[n-1]
-    f := make([]int, len(nums))
-    f[0] = 0
-    for i := 1; i < len(nums); i++ {
-        // f[i] 最大值为i
-        f[i] = i
-        // 遍历之前结果取一个最小值+1
-        for j := 0; j < i; j++ {
-            if nums[j]+j >= i {
-                f[i] = min(f[j]+1,f[i])
-            }
-        }
+```javascript
+// 状态：f[i] 表示从起点到当前位置最小次数
+// 推导：f[i] = f[j],a[j]+j >=i,min(f[j]+1)
+// 初始化：f[0] = 0
+// 结果：f[n-1]
+// v1动态规划（javascript超时 参考v2）
+var jump = function(nums) {
+  const dp = Array(nums.length).fill(Infinity);
+  dp[0] = 0;
+  for(let i = 1; i < nums.length; i++) {
+    for(let j = 0; j < i; j++) {
+      if(j + nums[j] >= i) {
+        dp[i] = Math.min(dp[i], dp[j] + 1);
+      }
     }
-    return f[len(nums)-1]
-}
-func min(a, b int) int {
-    if a > b {
-        return b
-    }
-    return a
-}
+  }
+  return dp[nums.length - 1];
+};
 ```
 
-```go
+```javascript
 // v2 动态规划+贪心优化
-func jump(nums []int) int {
-    n:=len(nums)
-    f := make([]int, n)
-    f[0] = 0
-    for i := 1; i < n; i++ {
-        // 取第一个能跳到当前位置的点即可
-        // 因为跳跃次数的结果集是单调递增的，所以贪心思路是正确的
-        idx:=0
-        for idx<n&&idx+nums[idx]<i{
-            idx++
-        }
-        f[i]=f[idx]+1
+// 因为跳跃次数的结果集是单调递增的，所以贪心思路是正确的 
+var jump = function(nums) {
+  if(nums.length <= 1) {
+    return 0;
+  }
+  let max_distance = nums[0];
+  let step = 1;
+  let i = 1;
+  while(nums.length - 1 > max_distance) {
+    let new_max = max_distance;
+    while(i <= max_distance) {
+      new_max = Math.max(new_max, i + nums[i]);
+      i++;
     }
-    return f[n-1]
-}
-
+    step++;
+    max_distance = new_max;
+  }
+  return step;
+};
 ```
 
 ### [palindrome-partitioning-ii](https://leetcode-cn.com/problems/palindrome-partitioning-ii/)
@@ -409,43 +315,39 @@ func jump(nums []int) int {
 > 给定一个字符串 _s_，将 _s_ 分割成一些子串，使每个子串都是回文串。
 > 返回符合要求的最少分割次数。
 
-```go
-func minCut(s string) int {
-	// state: f[i] "前i"个字符组成的子字符串需要最少几次cut(个数-1为索引)
-	// function: f[i] = MIN{f[j]+1}, j < i && [j+1 ~ i]这一段是一个回文串
-	// intialize: f[i] = i - 1 (f[0] = -1)
-	// answer: f[s.length()]
-	if len(s) == 0 || len(s) == 1 {
-		return 0
-	}
-	f := make([]int, len(s)+1)
-	f[0] = -1
-	f[1] = 0
-	for i := 1; i <= len(s); i++ {
-		f[i] = i - 1
-		for j := 0; j < i; j++ {
-			if isPalindrome(s, j, i-1) {
-				f[i] = min(f[i], f[j]+1)
-			}
-		}
-	}
-	return f[len(s)]
+```javascript
+// state: f[i] "前i"个字符组成的子字符串需要最少几次cut(个数-1为索引)
+// function: f[i] = MIN{f[j]+1}, j < i && [j+1 ~ i]这一段是一个回文串
+// intialize: f[i] = i - 1 (f[0] = -1)
+// answer: f[s.length()]
+var minCut = function(s) {
+  const dp = [-1, 0];
+  const posMap = findPosMap(s);
+  for(let i = 1; i < s.length; i++) {
+    const dps = posMap[s[i]].filter(p => p <= i && isPalindrome(s, p, i)).map(p => dp[p]);
+    dp[i + 1] = Math.min(...dps) + 1;
+  }
+  return dp[s.length];
+};
+function findPosMap(s) {
+  const map = {};
+  for(let i = 0; i < s.length; i++) {
+    if(!map[s[i]]) {
+      map[s[i]] = [];
+    }
+    map[s[i]].push(i);
+  }
+  return map;
 }
-func min(a, b int) int {
-	if a > b {
-		return b
-	}
-	return a
-}
-func isPalindrome(s string, i, j int) bool {
-	for i < j {
-		if s[i] != s[j] {
-			return false
-		}
-		i++
-		j--
-	}
-	return true
+function isPalindrome(s, start, end) {
+  while(start < end) {
+    if(s[start] !== s[end]) {
+      return false;
+    }
+    start++;
+    end--;
+  }
+  return true;
 }
 ```
 
@@ -457,91 +359,52 @@ func isPalindrome(s string, i, j int) bool {
 
 > 给定一个无序的整数数组，找到其中最长上升子序列的长度。
 
-```go
-func lengthOfLIS(nums []int) int {
-    // f[i] 表示从0开始到i结尾的最长序列长度
-    // f[i] = max(f[j])+1 ,a[j]<a[i]
-    // f[0...n-1] = 1
-    // max(f[0]...f[n-1])
-    if len(nums) == 0 || len(nums) == 1 {
-        return len(nums)
+```javascript
+// f[i] 表示从0开始到i结尾的最长序列长度
+// f[i] = max(f[j])+1 ,a[j]<a[i]
+// f[0...n-1] = 1
+// max(f[0]...f[n-1])
+var lengthOfLIS = function(nums) {
+  if(!nums.length) {
+    return 0;
+  }
+  const dp = [];
+  for(let i = 0; i < nums.length; i++) {
+    let max = 0;
+    for(let j = 0; j < i; j++) {
+      if(nums[i] > nums[j] && max < dp[j]) {
+        max = dp[j];
+      }
     }
-    f := make([]int, len(nums))
-    f[0] = 1
-    for i := 1; i < len(nums); i++ {
-        f[i] = 1
-        for j := 0; j < i; j++ {
-            if nums[j] < nums[i] {
-                f[i] = max(f[i], f[j]+1)
-            }
-        }
-    }
-    result := f[0]
-    for i := 1; i < len(nums); i++ {
-        result = max(result, f[i])
-    }
-    return result
-
-}
-func max(a, b int) int {
-    if a > b {
-        return a
-    }
-    return b
-}
+    dp[i] = max + 1;
+  }
+  return Math.max(...dp);
+};
 ```
 
 ### [word-break](https://leetcode-cn.com/problems/word-break/)
 
 > 给定一个**非空**字符串  *s*  和一个包含**非空**单词列表的字典  *wordDict*，判定  *s*  是否可以被空格拆分为一个或多个在字典中出现的单词。
 
-```go
-func wordBreak(s string, wordDict []string) bool {
-	// f[i] 表示前i个字符是否可以被切分
-	// f[i] = f[j] && s[j+1~i] in wordDict
-	// f[0] = true
-	// return f[len]
-
-	if len(s) == 0 {
-		return true
-	}
-	f := make([]bool, len(s)+1)
-	f[0] = true
-	max,dict := maxLen(wordDict)
-	for i := 1; i <= len(s); i++ {
-		l := 0
-		if i - max > 0 {
-			l = i - max
-		}
-		for j := l; j < i; j++ {
-			if f[j] && inDict(s[j:i],dict) {
-				f[i] = true
-                break
-			}
-		}
-	}
-	return f[len(s)]
+```javascript
+// f[i] 表示前i个字符是否可以被切分
+// f[i] = f[j] && s[j+1~i] in wordDict
+// f[0] = true
+// return f[len]
+var wordBreak = function(s, wordDict) {
+  const dp = [true];
+  for(let i = 1; i <= s.length; i++) {
+    for(const word of wordDict) {
+      const len = word.length;
+      const prev = i - len;
+      if(s[i - 1] === word[len - 1] && prev >= 0 && dp[prev] && word === s.slice(prev, i)) {
+        dp[i] = true;
+        break;
+      }
+    }
+  }
+  return !!dp[s.length];
 }
-
-
-
-func maxLen(wordDict []string) (int,map[string]bool) {
-    dict := make(map[string]bool)
-	max := 0
-	for _, v := range wordDict {
-		dict[v] = true
-		if len(v) > max {
-			max = len(v)
-		}
-	}
-	return max,dict
-}
-
-func inDict(s string,dict map[string]bool) bool {
-	_, ok := dict[s]
-	return ok
-}
-
 ```
 
 小结
@@ -561,48 +424,30 @@ func inDict(s string,dict map[string]bool) bool {
 > 一个字符串的   子序列   是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。
 > 例如，"ace" 是 "abcde" 的子序列，但 "aec" 不是 "abcde" 的子序列。两个字符串的「公共子序列」是这两个字符串所共同拥有的子序列。
 
-```go
-func longestCommonSubsequence(a string, b string) int {
-    // dp[i][j] a前i个和b前j个字符最长公共子序列
-    // dp[m+1][n+1]
-    //   ' a d c e
-    // ' 0 0 0 0 0
-    // a 0 1 1 1 1
-    // c 0 1 1 2 1
-    //
-    dp:=make([][]int,len(a)+1)
-    for i:=0;i<=len(a);i++ {
-        dp[i]=make([]int,len(b)+1)
+```javascript
+// dp[i][j] a前i个和b前j个字符最长公共子序列
+// dp[m+1][n+1]
+//   ' a d c e
+// ' 0 0 0 0 0
+// a 0 1 1 1 1
+// c 0 1 1 2 1
+var longestCommonSubsequence = function(text1, text2) {
+  if(!text1 || !text2) {
+    return 0;
+  }
+  const dp = Array.from({length: text1.length + 1}).map(() => [0]);
+  dp[0] = Array(text2.length + 1).fill(0);
+  for(let i = 0; i < text1.length; i++) {
+    for(let j = 0; j < text2.length; j++) {
+      if(text1[i] === text2[j]) {
+        dp[i + 1][j + 1] = dp[i][j] + 1;
+      } else {
+        dp[i + 1][j + 1] = Math.max(dp[i][j + 1], dp[i + 1][j]);
+      }
     }
-    for i:=1;i<=len(a);i++ {
-        for j:=1;j<=len(b);j++ {
-            // 相等取左上元素+1，否则取左或上的较大值
-            if a[i-1]==b[j-1] {
-                dp[i][j]=dp[i-1][j-1]+1
-            } else {
-                dp[i][j]=max(dp[i-1][j],dp[i][j-1])
-            }
-        }
-    }
-    return dp[len(a)][len(b)]
-}
-func max(a,b int)int {
-    if a>b{
-        return a
-    }
-    return b
-}
-```
-
-注意点
-
-- go 切片初始化
-
-```go
-dp:=make([][]int,len(a)+1)
-for i:=0;i<=len(a);i++ {
-    dp[i]=make([]int,len(b)+1)
-}
+  }
+  return dp[text1.length][text2.length];
+};
 ```
 
 - 从 1 开始遍历到最大长度
@@ -618,38 +463,24 @@ for i:=0;i<=len(a);i++ {
 
 思路：和上题很类似，相等则不需要操作，否则取删除、插入、替换最小操作次数的值+1
 
-```go
-func minDistance(word1 string, word2 string) int {
-    // dp[i][j] 表示a字符串的前i个字符编辑为b字符串的前j个字符最少需要多少次操作
-    // dp[i][j] = OR(dp[i-1][j-1]，a[i]==b[j],min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1])+1)
-    dp:=make([][]int,len(word1)+1)
-    for i:=0;i<len(dp);i++{
-        dp[i]=make([]int,len(word2)+1)
+```javascript
+// dp[i][j] 表示a字符串的前i个字符编辑为b字符串的前j个字符最少需要多少次操作
+// dp[i][j] = OR(dp[i-1][j-1]，a[i]==b[j],min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1])+1)
+var minDistance = function(word1, word2) {
+  const dp = Array.from({length: word1.length + 1}).map((v, i) => [i]);
+  dp[0] = Array.from({length: word2.length + 1}).map((v, i) => i);
+
+  for(let i = 1; i <= word1.length; i++) {
+    for(let j = 1; j <= word2.length; j++) {
+      if(word1[i - 1] === word2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] = Math.min(dp[i][j - 1], dp[i - 1][j], dp[i - 1][j - 1]) + 1;
+      }
     }
-    for i:=0;i<len(dp);i++{
-        dp[i][0]=i
-    }
-    for j:=0;j<len(dp[0]);j++{
-        dp[0][j]=j
-    }
-    for i:=1;i<=len(word1);i++{
-        for j:=1;j<=len(word2);j++{
-            // 相等则不需要操作
-            if word1[i-1]==word2[j-1] {
-                dp[i][j]=dp[i-1][j-1]
-            }else{ // 否则取删除、插入、替换最小操作次数的值+1
-                dp[i][j]=min(min(dp[i-1][j],dp[i][j-1]),dp[i-1][j-1])+1
-            }
-        }
-    }
-    return dp[len(word1)][len(word2)]
-}
-func min(a,b int)int{
-    if a>b{
-        return b
-    }
-    return a
-}
+  }
+  return dp[word1.length][word2.length];
+};
 ```
 
 说明
@@ -664,110 +495,25 @@ func min(a,b int)int{
 
 思路：和其他 DP 不太一样，i 表示钱或者容量
 
-```go
-func coinChange(coins []int, amount int) int {
-    // 状态 dp[i]表示金额为i时，组成的最小硬币个数
-    // 推导 dp[i]  = min(dp[i-1], dp[i-2], dp[i-5])+1, 前提 i-coins[j] > 0
-    // 初始化为最大值 dp[i]=amount+1
-    // 返回值 dp[n] or dp[n]>amount =>-1
-    dp:=make([]int,amount+1)
-    for i:=0;i<=amount;i++{
-        dp[i]=amount+1
+```javascript
+var coinChange = function(coins, amount) {
+  const len = amount + 1;
+  const dp = Array(len).fill(len);
+  dp[0] = 0;
+  for(let i = 1; i < len; i++) {
+    for(const coin of coins) {
+      if(i - coin >= 0) {
+        dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+      }
     }
-    dp[0]=0
-    for i:=1;i<=amount;i++{
-        for j:=0;j<len(coins);j++{
-            if  i-coins[j]>=0  {
-                dp[i]=min(dp[i],dp[i-coins[j]]+1)
-            }
-        }
-    }
-    if dp[amount] > amount {
-        return -1
-    }
-    return dp[amount]
-
-}
-func min(a,b int)int{
-    if a>b{
-        return b
-    }
-    return a
+  }
+  return dp[amount] > amount ? -1 : dp[amount];
 }
 ```
 
 注意
 
 > dp[i-a[j]] 决策 a[j]是否参与
-
-### [backpack](https://www.lintcode.com/problem/backpack/description)
-
-> 在 n 个物品中挑选若干物品装入背包，最多能装多满？假设背包的大小为 m，每个物品的大小为 A[i]
-
-```go
-func backPack (m int, A []int) int {
-    // write your code here
-    // f[i][j] 前i个物品，是否能装j
-    // f[i][j] =f[i-1][j] f[i-1][j-a[i] j>a[i]
-    // f[0][0]=true f[...][0]=true
-    // f[n][X]
-    f:=make([][]bool,len(A)+1)
-    for i:=0;i<=len(A);i++{
-        f[i]=make([]bool,m+1)
-    }
-    f[0][0]=true
-    for i:=1;i<=len(A);i++{
-        for j:=0;j<=m;j++{
-            f[i][j]=f[i-1][j]
-            if j-A[i-1]>=0 && f[i-1][j-A[i-1]]{
-                f[i][j]=true
-            }
-        }
-    }
-    for i:=m;i>=0;i--{
-        if f[len(A)][i] {
-            return i
-        }
-    }
-    return 0
-}
-
-```
-
-### [backpack-ii](https://www.lintcode.com/problem/backpack-ii/description)
-
-> 有 `n` 个物品和一个大小为 `m` 的背包. 给定数组 `A` 表示每个物品的大小和数组 `V` 表示每个物品的价值.
-> 问最多能装入背包的总价值是多大?
-
-思路：f[i][j] 前 i 个物品，装入 j 背包 最大价值
-
-```go
-func backPackII (m int, A []int, V []int) int {
-    // write your code here
-    // f[i][j] 前i个物品，装入j背包 最大价值
-    // f[i][j] =max(f[i-1][j] ,f[i-1][j-A[i]]+V[i]) 是否加入A[i]物品
-    // f[0][0]=0 f[0][...]=0 f[...][0]=0
-    f:=make([][]int,len(A)+1)
-    for i:=0;i<len(A)+1;i++{
-        f[i]=make([]int,m+1)
-    }
-    for i:=1;i<=len(A);i++{
-        for j:=0;j<=m;j++{
-            f[i][j]=f[i-1][j]
-            if j-A[i-1] >= 0{
-                f[i][j]=max(f[i-1][j],f[i-1][j-A[i-1]]+V[i-1])
-            }
-        }
-    }
-    return f[len(A)][m]
-}
-func max(a,b int)int{
-    if a>b{
-        return a
-    }
-    return b
-}
-```
 
 ## 练习
 
