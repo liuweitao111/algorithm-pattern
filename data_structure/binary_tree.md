@@ -362,22 +362,13 @@ func swap(nums []int, i, j int) {
 
 思路：分治法
 
-```go
-func maxDepth(root *TreeNode) int {
-    // 返回条件处理
-    if root == nil {
-        return 0
-    }
-    // divide：分左右子树分别计算
-    left := maxDepth(root.Left)
-    right := maxDepth(root.Right)
-
-    // conquer：合并左右子树结果
-    if left > right {
-        return left + 1
-    }
-    return right + 1
-}
+```javascript
+var maxDepth = function(root) {
+  if(!root) {
+    return 0;
+  }
+  return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
+};
 ```
 
 #### balanced-binary-tree
@@ -390,30 +381,21 @@ func maxDepth(root *TreeNode) int {
 因为需要返回是否平衡及高度，要么返回两个数据，要么合并两个数据，
 所以用-1 表示不平衡，>0 表示树高度（二义性：一个变量有两种含义）。
 
-```go
-func isBalanced(root *TreeNode) bool {
-    if maxDepth(root) == -1 {
-        return false
+```javascript
+var isBalanced = function(root) {
+  const helper = node => {
+    if(!node) {
+      return 0;
     }
-    return true
-}
-func maxDepth(root *TreeNode) int {
-    // check
-    if root == nil {
-        return 0
+    const l = helper(node.left);
+    const r = helper(node.right);
+    if(l === -1 || r === -1 || Math.abs(l - r) > 1) {
+      return -1;
     }
-    left := maxDepth(root.Left)
-    right := maxDepth(root.Right)
-
-    // 为什么返回-1呢？（变量具有二义性）
-    if left == -1 || right == -1 || left-right > 1 || right-left > 1 {
-        return -1
-    }
-    if left > right {
-        return left + 1
-    }
-    return right + 1
-}
+    return Math.max(l, r) + 1;
+  }
+  return helper(root) !== -1;
+};
 ```
 
 注意
